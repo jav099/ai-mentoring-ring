@@ -238,7 +238,7 @@ section{padding:84px 0 76px;border-top:1px solid var(--ink)}
 .tier.lit .bar{background:var(--user)}
 
 /* place strip */
-.places{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-top:1px solid var(--ink);margin-top:56px}
+.places{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-top:1px solid var(--ink);margin-top:8px}
 .place{padding:12px 22px 6px 0;position:relative;min-width:0}
 .place+.place{padding-left:22px;border-left:1px solid var(--rule)}
 .place .ph{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:10px}
@@ -325,6 +325,26 @@ section{padding:84px 0 76px;border-top:1px solid var(--ink)}
 .docs a small{display:block;color:var(--mute);font-size:11.5px}
 footer{border-top:1px solid var(--ink);padding:22px 0 60px;font-size:12px;color:var(--mute)}
 
+/* progressive disclosure */
+.rv{display:grid;grid-template-rows:0fr;opacity:0;visibility:hidden;transform:translateY(-10px);transition:grid-template-rows .7s var(--ease),opacity .35s var(--ease),transform .7s var(--ease),visibility 0s linear .7s}
+.rv>.rv-in{min-height:0;overflow:hidden}
+.rv.open{grid-template-rows:1fr;opacity:1;visibility:visible;transform:none;transition:grid-template-rows .7s var(--ease),opacity .6s var(--ease) .1s,transform .7s var(--ease),visibility 0s}
+.rv.open.settled>.rv-in{overflow:visible}
+.rv-pad{padding-top:44px}
+.rvbar{margin-top:40px}
+.btn.cta{padding:14px 24px;font-size:14.5px;display:inline-flex;align-items:center}
+.cta::after{content:"↓";margin-left:14px;display:inline-block;transition:transform .5s var(--ease)}
+.cta[aria-expanded="true"]::after{transform:rotate(180deg)}
+.swap{display:grid}
+.swap>*{grid-area:1/1;min-width:0}
+.slot{border:1px dashed var(--mute);min-height:250px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:18px;padding:30px;transition:opacity .4s var(--ease),visibility 0s}
+.swap.open .slot{opacity:0;visibility:hidden;transition:opacity .35s var(--ease),visibility 0s .35s}
+.winwrap{opacity:0;visibility:hidden;transition:opacity .35s var(--ease),visibility 0s .35s}
+.swap.open .winwrap{opacity:1;visibility:visible;transition:opacity .6s var(--ease) .25s,visibility 0s}
+.ctlr{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.s1grid:not(.open) .tn .tst{opacity:0}
+.tn .tst{transition:opacity .6s var(--ease) .3s}
+.s1grid:not(.open) .tn.hl{background:none}
 /* reveal */
 .sh::after{transform-origin:left}
 .js .sh::after{transform:scaleX(0);transition:transform 1s var(--ease)}
@@ -355,6 +375,7 @@ footer{border-top:1px solid var(--ink);padding:22px 0 60px;font-size:12px;color:
   .sh .num{font-size:60px}
   .sh .sub{grid-column:1/-1;text-align:left;margin-top:10px}
   .panes{grid-template-columns:1fr}
+  .slot{min-height:0;padding:20px}
   .pane+.pane{padding-left:0;border-left:0;border-top:1px solid var(--rule)}
   .stage{grid-template-columns:1fr}
   .wall{height:90px;margin:18px 0;border:0;border-top:1px solid var(--ink);border-bottom:1px solid var(--ink)}
@@ -467,8 +488,9 @@ footer{border-top:1px solid var(--ink);padding:22px 0 60px;font-size:12px;color:
 <section id="sources" data-scope="s1">
   <div class="wrap">
     <header class="sh"><span class="num">01</span><h2>Where does the agent look?</h2></header>
-    <div class="s1grid">
-      <div>
+    <div class="s1grid" id="s1grid">
+      <div class="s1left">
+        <div class="rv" id="s1Ctl" inert><div class="rv-in">
         <div class="ctl">
           <fieldset class="seg" id="repoSel">
             <legend class="lbl">Start a session in</legend>
@@ -476,9 +498,10 @@ footer{border-top:1px solid var(--ink);padding:22px 0 60px;font-size:12px;color:
             <label class="opt"><input type="radio" name="repo" value="side"><span>side-project/</span></label>
             <label class="opt"><input type="radio" name="repo" value="scratch"><span>scratch/</span></label>
           </fieldset>
-          <button class="btn" id="plugBtn" type="button" aria-pressed="false">Install plugin</button>
+          <span class="ctlr"><button class="btn" id="plugBtn" type="button" aria-pressed="false">Install plugin</button><button class="btn" id="s1Hide" type="button" aria-expanded="true" aria-controls="s1Ctl s1Swap">Hide</button></span>
         </div>
         <div class="cmd"><p><span class="pr">$</span> cd <span class="cwd" id="cwd">~/src</span> &amp;&amp; copilot</p><p class="pl"><span class="pr">$</span> <span id="plugCmd">copilot plugin install chromium-dev-kit@awesome-copilot</span></p></div>
+        </div></div>
         <div class="panes">
           <div class="pane s-user">
             <h3><i></i>User level</h3>
@@ -489,11 +512,16 @@ footer{border-top:1px solid var(--ink);padding:22px 0 60px;font-size:12px;color:
             <div class="tree" id="treeRepo"></div>
           </div>
         </div>
-        <p class="other"><span>other tools: <b>~/.claude/</b> <b>~/.codex/</b></span><span>shared: <b>~/.agents/</b> <b>.agents/</b></span></p>
+        <div class="rv" id="s1Other" inert><div class="rv-in"><p class="other"><span>other tools: <b>~/.claude/</b> <b>~/.codex/</b></span><span>shared: <b>~/.agents/</b> <b>.agents/</b></span></p></div></div>
       </div>
       <aside class="s1win">
-        <div id="win1"></div>
-        <p class="note"><b>Combined.</b> No precedence. Avoid conflicts.</p>
+        <div class="swap" id="s1Swap">
+          <div class="slot" id="s1Slot"><span class="lbl">Context window</span><button class="btn go cta" id="s1Show" type="button" aria-expanded="false" aria-controls="s1Ctl s1Swap">Show what loads</button></div>
+          <div class="winwrap" id="s1WinWrap" inert>
+            <div id="win1"></div>
+            <p class="note"><b>Combined.</b> No precedence. Avoid conflicts.</p>
+          </div>
+        </div>
       </aside>
     </div>
   </div>
@@ -531,6 +559,9 @@ footer{border-top:1px solid var(--ink);padding:22px 0 60px;font-size:12px;color:
 <section id="skills" data-scope="s3">
   <div class="wrap">
     <header class="sh"><span class="num">03</span><h2>Skills load in layers.</h2></header>
+    <div class="places" id="places3"></div>
+    <div class="rvbar"><button class="btn go cta" id="s3Toggle" type="button" aria-expanded="false" aria-controls="s3Panel" data-show="Show the layers" data-hide="Hide the layers">Show the layers</button></div>
+    <div class="rv" id="s3Panel" inert><div class="rv-in"><div class="rv-pad">
     <div class="s3grid">
       <div>
         <fieldset class="seg steps" id="stepSel">
@@ -563,7 +594,7 @@ description: Write WPT reftests. Use for
       </div>
       <aside><div id="win3"></div></aside>
     </div>
-    <div class="places" id="places3"></div>
+    </div></div></div>
   </div>
 </section>
 
@@ -571,6 +602,9 @@ description: Write WPT reftests. Use for
 <section id="agents" data-scope="s4">
   <div class="wrap">
     <header class="sh"><span class="num">04</span><h2>Agents work in their own room.</h2></header>
+    <div class="places" id="places4"></div>
+    <div class="rvbar"><button class="btn go cta" id="s4Toggle" type="button" aria-expanded="false" aria-controls="s4Panel" data-show="Show the delegation" data-hide="Hide the delegation">Show the delegation</button></div>
+    <div class="rv" id="s4Panel" inert><div class="rv-in"><div class="rv-pad">
     <div class="stagehead"><span style="display:flex;gap:8px"><button class="btn go" id="runBtn" type="button">Delegate</button><button class="btn" id="resetBtn" type="button">Reset</button></span></div>
     <div class="stage">
       <div class="col"><h3>Main session</h3><div id="winP"></div></div>
@@ -603,7 +637,7 @@ You review WPT tests. Do not edit files.</pre>
         <p class="duelres" id="duelRes" aria-live="polite"></p>
       </div>
     </div>
-    <div class="places" id="places4"></div>
+    </div></div></div>
   </div>
 </section>
 
@@ -668,6 +702,27 @@ const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',
 const RM=matchMedia('(prefers-reduced-motion: reduce)');
 const EASE='cubic-bezier(.22,1,.36,1)';
 const wait=ms=>new Promise(r=>setTimeout(r,RM.matches?0:ms));
+function setRv(el,open){
+  el.classList.toggle('open',open); el.inert=!open; clearTimeout(el._t);
+  if(open) el._t=setTimeout(()=>el.classList.add('settled'),RM.matches?0:760); else el.classList.remove('settled');
+}
+function disclose(o){
+  let isOpen=false, timer;
+  const set=v=>{
+    isOpen=v; clearTimeout(timer);
+    o.triggers.forEach(t=>{t.setAttribute('aria-expanded',v);if(t.dataset.show)t.textContent=v?t.dataset.hide:t.dataset.show});
+    o.rvs.forEach(el=>setRv(el,v));
+    if(o.extra)o.extra(v);
+    if(v){if(o.nudge){const t=o.triggers[0],y=t.getBoundingClientRect().top;if(y>innerHeight*.3)scrollBy({top:y-100,behavior:RM.matches?'auto':'smooth'})}
+      if(o.focusOpen)o.focusOpen().focus({preventScroll:true});timer=setTimeout(o.onOpen,RM.matches?0:(o.delay||720))}
+    else{if(o.onClose)o.onClose();if(o.focusClose)o.focusClose().focus({preventScroll:true});timer=setTimeout(o.afterClose,RM.matches?0:760)}
+  };
+  o.triggers.forEach(t=>t.addEventListener('click',()=>{
+    const closing=isOpen, y0=t.getBoundingClientRect().top;
+    set(!isOpen);
+    if(closing&&!RM.matches){const end=performance.now()+850;const hold=()=>{const d=t.getBoundingClientRect().top-y0;if(d)scrollBy(0,d);if(performance.now()<end)requestAnimationFrame(hold)};requestAnimationFrame(hold)}
+  }));
+}
 const onceVisible=(el,fn,th=.25)=>{const io=new IntersectionObserver(es=>{if(es.some(e=>e.isIntersecting)){io.disconnect();fn()}},{threshold:th});io.observe(el)};
 
 /* ---------- context window component ---------- */
@@ -783,7 +838,7 @@ function places(root,kind){
     skills:{u:['~/.copilot/skills/&lt;name&gt;/SKILL.md','~/.agents/skills/&lt;name&gt;/SKILL.md'],r:['src/.github/skills/&lt;name&gt;/SKILL.md','src/.claude/skills/&lt;name&gt;/SKILL.md','src/.agents/skills/&lt;name&gt;/SKILL.md'],p:['skills/ inside the plugin']},
     agents:{u:['~/.copilot/agents/&lt;id&gt;.agent.md'],r:['src/.github/agents/&lt;id&gt;.agent.md'],p:['agents/ inside the plugin']}
   }[kind];
-  const col=(src,title,who,list,cov)=>`<div class="place s-${src}" tabindex="0"><div class="ph"><div><h3>${title}</h3><div class="who">${who}</div></div>${glyph(cov,src)}</div><ul>${list.map(x=>`<li>${x}</li>`).join('')}</ul></div>`;
+  const col=(src,title,who,list,cov)=>`<div class="place s-${src}"><div class="ph"><div><h3>${title}</h3><div class="who">${who}</div></div>${glyph(cov,src)}</div><ul>${list.map(x=>`<li>${x}</li>`).join('')}</ul></div>`;
   root.innerHTML=col('user','Just me','me · every repo',D.u,COV.user)+col('repo','Whole repo','everyone · src/',D.r,COV.repo)+col('plug','Plugin','me · every repo',D.p,COV.plug);
 }
 
@@ -858,13 +913,13 @@ function places(root,kind){
     {d:3,n:'agents/spec-reader.agent.md',k:'p-ag',t:40,kind:'agent',row:'spec-reader',src:'plug'},
     {d:3,n:'MCP server config',k:'p-mcp',t:900,kind:'mcp',row:'chromium-search',src:'plug'}
   ];
-  let repo='chromium', plug=false, prevKeys=new Set();
+  let repo='chromium', plug=false, open=false;
   const pf=nodes=>nodes.map((n,i)=>{let p='';for(let d=1;d<=n.d;d++){let more=false;for(let j=i+1;j<nodes.length;j++){if(nodes[j].d<d)break;if(nodes[j].d===d){more=true;break}}p+=d===n.d?(more?'├─ ':'└─ '):(more?'│  ':'   ')}return p});
   function tree(el,nodes,src,freshSet){
     const P=pf(nodes); let fi=0;
     el.innerHTML=nodes.map((n,i)=>{
       const s=n.src||src, st=n.k?(n.match?'match':'loaded'):'dir', fr=freshSet&&n.k&&freshSet.has(n.k)||freshSet&&!n.k&&freshSet.has('*'+n.n);
-      return `<div class="tn s-${s} ${st}${fr?' fresh':''}" ${n.k?`data-key="${n.k}" tabindex="0"`:''} ${n.tip?`title="${esc(n.tip)}"`:''} style="--i:${fr?fi++:0}"><span class="pf">${P[i]}</span><span class="tname">${esc(n.n)}</span>${n.k?(n.match?'<span class="tst">on match</span>':`<span class="tst">${fmt(n.t)}</span>`):''}</div>`;
+      return `<div class="tn s-${s} ${st}${fr?' fresh':''}" ${n.k?`data-key="${n.k}"${open?' tabindex="0"':''}`:''} ${n.tip?`title="${esc(n.tip)}"`:''} style="--i:${fr?fi++:0}"><span class="pf">${P[i]}</span><span class="tname">${esc(n.n)}</span>${n.k?(n.match?'<span class="tst">on match</span>':`<span class="tst">${fmt(n.t)}</span>`):''}</div>`;
     }).join('');
   }
   const win=new Win($('#win1'),{budget:16000});
@@ -879,7 +934,7 @@ function places(root,kind){
     tree($('#treeUser'),plug?USER.concat(PLUG):USER,'user',fresh);
     tree($('#treeRepo'),REPOS[repo].nodes,'repo',swap?new Set(REPOS[repo].nodes.filter(n=>n.k).map(n=>n.k)):null);
     $('#cwd').textContent=REPOS[repo].cwd;
-    win.setup(items(),origin);
+    win.setup(open?items():[],origin);
   }
   $$('input[name=repo]',sec).forEach(i=>i.addEventListener('change',()=>{repo=i.value;render({swap:true})}));
   const btn=$('#plugBtn'),cmd=$('#plugCmd');
@@ -889,7 +944,22 @@ function places(root,kind){
     render({fresh:plug?new Set(PLUG.map(n=>n.k||'*'+n.n)):null});
   });
   tree($('#treeUser'),USER,'user'); tree($('#treeRepo'),REPOS[repo].nodes,'repo');
-  onceVisible($('#win1'),()=>win.setup(items(),origin),.35);
+  disclose({
+    triggers:[$('#s1Show'),$('#s1Hide')], rvs:[$('#s1Ctl'),$('#s1Other')], delay:650,
+    extra(v){
+      open=v; $('#s1grid').classList.toggle('open',v); $('#s1Swap').classList.toggle('open',v);
+      $('#s1Slot').inert=v; $('#s1WinWrap').inert=!v;
+      $$('.tn[data-key]',sec).forEach(t=>v?t.setAttribute('tabindex','0'):t.removeAttribute('tabindex'));
+    },
+    focusOpen:()=>$('input[name=repo]:checked',sec), focusClose:()=>$('#s1Show'),
+    onOpen:()=>render(),
+    onClose:()=>win.setup([],origin),
+    afterClose(){
+      repo='chromium'; plug=false; $('input[name=repo][value=chromium]',sec).checked=true;
+      btn.setAttribute('aria-pressed','false'); btn.textContent='Install plugin'; cmd.parentNode.classList.remove('on');
+      render();
+    }
+  });
 })();
 
 /* ---------- 02 instructions ---------- */
@@ -981,7 +1051,15 @@ function places(root,kind){
   const fb=$('#forceBtn'); fb.addEventListener('click',()=>{forced=!forced;fb.setAttribute('aria-pressed',forced);paint()});
   places($('#places3'),'skills');
   paint();
-  onceVisible($('#win3'),()=>win.setup(setupItems,origin),.35);
+  disclose({
+    triggers:[$('#s3Toggle')], rvs:[$('#s3Panel')], nudge:true,
+    onOpen:()=>{win.setup(setupItems,origin);paint()},
+    onClose:()=>{},
+    afterClose(){
+      step=0; forced=false; $('input[name=step][value="0"]',sec).checked=true; fb.setAttribute('aria-pressed','false');
+      win.setup([],origin); win.convo([],origin); paint();
+    }
+  });
 })();
 
 /* ---------- 04 agents ---------- */
@@ -1003,10 +1081,10 @@ function places(root,kind){
   ];
   let run=0, started=false;
   const total=()=>C.all().reduce((a,i)=>a+i.tok,0);
-  function reset(){
+  function reset(populate=true){
     run++; started=false;
     $('#arr1').classList.remove('on'); $('#arr2').classList.remove('on'); $('#result').classList.remove('on');
-    P.setup(pSetup,null); P.convo(pConvo0,null);
+    P.setup(populate?pSetup:[],null); P.convo(populate?pConvo0:[],null);
     C.setup([],null); C.convo([],null); C.root.classList.add('idle'); $('#rParent').textContent='0';
     $('#rChild').textContent='0'; $('#rParent').textContent='0';
     $('#runBtn').disabled=false;
@@ -1035,9 +1113,14 @@ function places(root,kind){
     C.all(); $$('.row:not([data-fixed])',C.root).forEach(r=>r.classList.toggle('done',r.dataset.key!=='c-s'));
     $('#rChild').textContent=fmt(total()); $('#rParent').textContent=fmt(360);
   }
-  $('#runBtn').addEventListener('click',go); $('#resetBtn').addEventListener('click',reset);
+  $('#runBtn').addEventListener('click',go); $('#resetBtn').addEventListener('click',()=>reset());
   P.setup([],null);
-  onceVisible($('#winP'),()=>{P.setup(pSetup,null);P.convo(pConvo0,null)},.3);
+  disclose({
+    triggers:[$('#s4Toggle')], rvs:[$('#s4Panel')], nudge:true,
+    onOpen:()=>reset(),
+    onClose:()=>{run++},
+    afterClose:()=>reset(false)
+  });
 
   /* same-ID duel */
   const U=$('#slabU'),R=$('#slabR');
@@ -1063,8 +1146,14 @@ function places(root,kind){
 /* ---------- nav + reveal ---------- */
 (function(){
   const links=$$('.rail a'),secs=['top','sources','instructions','skills','agents','cheat'].map(id=>document.getElementById(id));
-  const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){links.forEach(a=>a.setAttribute('aria-current',a.dataset.nav===e.target.id))}}),{rootMargin:'-40% 0px -55% 0px'});
-  secs.forEach(s=>io.observe(s));
+  let cur=null;
+  const upd=()=>{
+    const y=innerHeight*.42; let hit=secs[0];
+    secs.forEach(s=>{if(s.getBoundingClientRect().top<=y)hit=s});
+    if(hit.id!==cur){cur=hit.id;links.forEach(a=>a.setAttribute('aria-current',a.dataset.nav===cur))}
+  };
+  addEventListener('scroll',upd,{passive:true}); addEventListener('resize',upd);
+  new ResizeObserver(upd).observe(document.querySelector('main')); upd();
   const rv=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');rv.unobserve(e.target)}}),{threshold:.6});
   $$('.sh').forEach(s=>rv.observe(s));
 })();
